@@ -7,29 +7,54 @@ app.secret_key='poshit'
 @app.route('/')
 def index():
     try:
+        session['inputPos']
+    except:
+        session['inputPos']="-20px"
+    try:
         session['secretNum']
     except:#initialize everything
         session['secretNum']=random.randrange(1,101)
         session['buttonTxt']='Submit'
         session['txt1']=''
+        session['txt2']=''
+        session['color2']='white'
+        session['inputPos']="-20px"
+    try:
+        session['color']
+    except:
+        session['color']='red'
     return render_template("index.html")
 @app.route('/guess',methods=['POST'])
 def guess():
-    if int(request.form['guessNum'])==session['secretNum']:
-        #session['buttonTxt']='Play Again!'
-        session['color2']='green'
-        session['txt2']="{} was the right number!".format(request.form['guessNum'])
-        #displays the button that lets  you restart
+    try:
+        session['restart']
+    except:
+        session['restart']=False
+    if session['restart']==True:
+        session.pop('secretNum')
+        session.pop('restart')
         return redirect('/')
+    if int(request.form['guessNum'])==session['secretNum']:
+        session['buttonTxt']='Play Again!'
+        # session['color']='green'
+        session['txt2']="{} was the right number!".format(request.form['guessNum'])
+        session['txt1']=''
+        session['color2']='green'
+        session['inputPos']='-1000px'
+        #displays the button that lets  you restart
+        session['restart']=True
     elif int(request.form['guessNum'])<session['secretNum']:
         session['txt1']='too low!'
+        session['color']='red'
     elif int(request.form['guessNum'])>session['secretNum']:
-        session['txt1']='too high!'      
+        session['txt1']='too high!'  
+        session['color']='red'    
     return redirect('/')
 #what's left: hide text box, change color & border
-@app.route('/restart')
-def restart():
-    session.pop('secretNum')
-    return redirect('/')
+
+# @app.route('/restart')
+# def restart():
+#     session.pop('secretNum')
+#     return redirect('/')
 
 app.run(debug=True)
